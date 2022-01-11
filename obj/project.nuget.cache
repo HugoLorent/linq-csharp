@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "o1ORbbATTyIOd5SLEZRivei00QFWLwsydlCn57t/LOqvk8sCqZLo6UtZ1zLOsqkgxQXcL+2uS66xf1uBhx1S6A==",
+  "dgSpecHash": "tQyOs46ZMtjpQC6W6SFyXR4NQ0K1bp2LewNrznk2oaEavO6r7L1PDe8zttThAy0+bLg0Np/s1MV9Z79FIrGxlg==",
   "success": true,
   "projectFilePath": "C:\\Users\\remes\\Source\\Repos\\linq-csharp\\linq-csharp.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\remes\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512"
+  ],
   "logs": []
 }
