@@ -1,0 +1,14 @@
+C:\Users\remes\Source\Repos\linq-csharp\bin\Debug\netcoreapp3.1\linq-csharp.exe
+C:\Users\remes\Source\Repos\linq-csharp\bin\Debug\netcoreapp3.1\linq-csharp.deps.json
+C:\Users\remes\Source\Repos\linq-csharp\bin\Debug\netcoreapp3.1\linq-csharp.runtimeconfig.json
+C:\Users\remes\Source\Repos\linq-csharp\bin\Debug\netcoreapp3.1\linq-csharp.runtimeconfig.dev.json
+C:\Users\remes\Source\Repos\linq-csharp\bin\Debug\netcoreapp3.1\linq-csharp.dll
+C:\Users\remes\Source\Repos\linq-csharp\bin\Debug\netcoreapp3.1\linq-csharp.pdb
+C:\Users\remes\Source\Repos\linq-csharp\obj\Debug\netcoreapp3.1\linq-csharp.csproj.AssemblyReference.cache
+C:\Users\remes\Source\Repos\linq-csharp\obj\Debug\netcoreapp3.1\linq-csharp.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\remes\Source\Repos\linq-csharp\obj\Debug\netcoreapp3.1\linq-csharp.AssemblyInfoInputs.cache
+C:\Users\remes\Source\Repos\linq-csharp\obj\Debug\netcoreapp3.1\linq-csharp.AssemblyInfo.cs
+C:\Users\remes\Source\Repos\linq-csharp\obj\Debug\netcoreapp3.1\linq-csharp.csproj.CoreCompileInputs.cache
+C:\Users\remes\Source\Repos\linq-csharp\obj\Debug\netcoreapp3.1\linq-csharp.dll
+C:\Users\remes\Source\Repos\linq-csharp\obj\Debug\netcoreapp3.1\linq-csharp.pdb
+C:\Users\remes\Source\Repos\linq-csharp\obj\Debug\netcoreapp3.1\linq-csharp.genruntimeconfig.cache
