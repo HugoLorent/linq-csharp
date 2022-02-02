@@ -10,8 +10,11 @@ namespace linq_csharp.JSON
 {
     class TrainJSON
     {
-        List<String> gares = new List<string>();
-        IEnumerable<String> garesUnique = new List<string>();
+        List<String> trajets = new List<string>();
+        IEnumerable<String> départsUniques = new List<string>();
+        IEnumerable<String> arrivéeDisponible = new List<string>();
+        String départ = "";
+        String arrivée = "";
 
 
         int compteurAffichage = 1;
@@ -24,54 +27,147 @@ namespace linq_csharp.JSON
         {
             //On prépare une requête pour récupérer tous les trajet
             Console.WriteLine("Sélectionnez un départ :");
-            var queryTravels = from travel in myJsonTravels
-                               let line = travel["fields"]["od"]
-                               select line;
+            var reqRechercheTousTrajets = from trajet in myJsonTravels
+                               let ligne = trajet["fields"]["od"]
+                               select ligne;
             //On ajoute tous les éléments de la requête dans la liste statipns
-            foreach (var travel in queryTravels)
+            foreach (var trajet in reqRechercheTousTrajets)
             {
-                gares.Add(travel.ToString());
+                trajets.Add(trajet.ToString());
             }
 
             //On prepare une requete sur la liste stations pour supprimer tous ce qu'il y a apres le -,
             //afin de récupérer seulement les gares de départ
-            var uniqueTravels = from travel in gares
+            var reqDépartUnique = from travel in trajets
                                 let carac = travel.ToString().IndexOf("-")
                                 let line = travel.ToString().Substring(0, carac)
                                 orderby line
                                 select line;
 
             //Pour éviter les doublons on trim la liste puis on met tous en majuscule
-            uniqueTravels = uniqueTravels.Select(t => t.Trim().ToUpper());
+            reqDépartUnique = reqDépartUnique.Select(t => t.Trim().ToUpper());
 
             //Enfin on fait un distinct pour supprimer tous les doublons
-            garesUnique = uniqueTravels.Distinct();
+            départsUniques = reqDépartUnique.Distinct();
             Console.WriteLine("Voici les départs d'où vous pouvez partir : ");
 
-            affiche4par4(garesUnique);
+            affiche4par4(départsUniques);
+            choisirDépart();
+        }
+        public void choisirDépart()
+        {
+            Console.WriteLine("");
+            Console.WriteLine("D'ou voulez-vous partir ? ");
+            this.départ = Console.ReadLine();
+            this.départ = this.départ.ToUpper();
+            bool gareCorrect = false;
+
+            foreach (var gare in départsUniques)
+            {
+                if (this.départ == gare)
+                {
+                    gareCorrect = true;
+                }
+            }
+            if (!gareCorrect)
+            {
+                while (!gareCorrect)
+                {
+                    Console.WriteLine("Cette gare n'existe pas, veuillez retaper votre destination :");
+                    this.départ = Console.ReadLine();
+                    this.départ = this.départ.ToUpper();
+                    foreach (var gare in départsUniques)
+                    {
+                        if (this.départ == gare)
+                        {
+                            gareCorrect = true;
+                        }
+                    }
+                }
+            }
+
+            //On recherche tous les trajets qui ont un départ à this.départ (choix utilisateur)
+            var reqContientDépart = from trajet in myJsonTravels
+                                 let ligne = trajet["fields"]["od"]
+                                 where ligne.ToString().Contains(départ)
+                                 select ligne
+                                 into tousTrajets
+                                 let carac = tousTrajets.ToString().IndexOf("-") + 1
+                                 let arrivé = tousTrajets.ToString().Substring(carac)
+                                 select arrivé;
+            reqContientDépart = reqContientDépart.Select(t => t.Trim().ToUpper());
+            arrivéeDisponible = reqContientDépart.Where(i => !i.Contains(départ));
+            affiche4par4(arrivéeDisponible);
+            choisirArrivée();
+        }
+
+        private void choisirArrivée()
+        {
+            Console.WriteLine("");
+            Console.WriteLine("Où voulez-vous arriver ? ");
+            this.arrivée = Console.ReadLine();
+            this.arrivée = this.arrivée.ToUpper();
+            bool gareCorrect = false;
+
+            //On vérifie que la gare recherchée existe avec le départ choisi
+            foreach (var gare in arrivéeDisponible)
+            {
+                if (this.arrivée == gare)
+                {
+                    gareCorrect = true;
+                }
+            }
+            if (!gareCorrect)
+            {
+                while (!gareCorrect)
+                {
+                    Console.WriteLine("Cette gare d'arrivée n'est pas disponible avec votre départ, veuillez entrer une arrivée disponible :");
+                    this.arrivée = Console.ReadLine();
+                    this.arrivée = this.arrivée.ToUpper();
+                    foreach (var gare in arrivéeDisponible)
+                    {
+                        if (this.arrivée == gare)
+                        {
+                            gareCorrect = true;
+                        }
+                    }
+                }
+            }
+
+            //On fait une requête sur les trajets pour chercher un trajet qui contient le départ et l'arrivée de l'utilisateur et qui commence par le départ
+            var reqContientDépartEtArrivée = from trajet in myJsonTravels
+                                           let ligne = trajet["fields"]["od"]
+                                           let prix2nd = trajet["fields"]["plein_tarif_loisir_2nde"]
+                                           let prix1er = trajet["fields"]["1ere_classe"]
+                                           where ligne.ToString().Contains(this.départ) && ligne.ToString().Contains(this.arrivée) && ligne.ToString().StartsWith(this.départ)
+                                           select $"Votre trajet : {ligne}, pour le prix 2nd classe {prix2nd}EUR, pour le prix 1er classe {prix1er}EUR";
+            foreach(var trajetCorrespondantRecherche in reqContientDépartEtArrivée)
+            {
+                Console.WriteLine(trajetCorrespondantRecherche);
+            }
         }
 
         public void trierParPrix2ndclasse()
         {
-            var queryTravels = from travel in myJsonTravels
-                               orderby travel["fields"]["plein_tarif_loisir_2nde"]
-                               let line = $"Voyage : {travel["fields"]["od"]} Prix (2eme classe) : {travel["fields"]["plein_tarif_loisir_2nde"]} EUR"
-                               select line;
-            foreach (var travel in queryTravels)
+            var reqTriParPrix2ndClasse = from trajet in myJsonTravels
+                               orderby trajet["fields"]["plein_tarif_loisir_2nde"]
+                               let ligne = $"Voyage : {trajet["fields"]["od"]} Prix (2eme classe) : {trajet["fields"]["plein_tarif_loisir_2nde"]} EUR"
+                               select ligne;
+            foreach (var trajet in reqTriParPrix2ndClasse)
             {
-                Console.WriteLine($"{travel} ");
+                Console.WriteLine($"{trajet} ");
             }
         }
 
         public void trierParPrix1erclasse()
         {
-            var queryTravels = from travel in myJsonTravels
-                               orderby travel["fields"]["plein_tarif_loisir_2nde"]
-                               let line = $"Voyage : {travel["fields"]["od"]} Prix (1ere classe) : {travel["fields"]["1ere_classe"]} EUR"
-                               select line;
-            foreach (var travel in queryTravels)
+            var reqTriParPrix1erClasse = from trajet in myJsonTravels
+                               orderby trajet["fields"]["plein_tarif_loisir_2nde"]
+                               let ligne = $"Voyage : {trajet["fields"]["od"]} Prix (1ere classe) : {trajet["fields"]["1ere_classe"]} EUR"
+                               select ligne;
+            foreach (var trajet in reqTriParPrix1erClasse)
             {
-               Console.WriteLine($"{travel} ");     
+               Console.WriteLine($"{trajet} ");     
             }
         }
 
