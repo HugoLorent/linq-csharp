@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using linq_csharp.JSON;
+using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Linq;
@@ -11,7 +12,11 @@ namespace linq_csharp
         static void Main(string[] args)
         {
             Xml xml = new Xml();
-            xml.proposerDepart();
+            //xml.proposerDepart();
+            TrainJSON json = new TrainJSON();
+            json.proposerDépart();
+
+
         }
     }
 }
