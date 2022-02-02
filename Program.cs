@@ -12,9 +12,9 @@ namespace linq_csharp
         static void Main(string[] args)
         {
             Xml xml = new Xml();
-            //xml.proposerDepart();
+            xml.main();
             TrainJSON json = new TrainJSON();
-            json.proposerDépart();
+            // json.proposerDépart();
 
 
         }
