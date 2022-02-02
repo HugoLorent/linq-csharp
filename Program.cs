@@ -29,12 +29,45 @@ namespace linq_csharp
                 if (sourceVoulue == "json")
                 {
                     TrainJSON json = new TrainJSON();
-                    json.proposerDépart();
+                    Console.WriteLine("Tapez 1 pour trier les trajets par prix OU tapez 2 pour chercher un trajet ?");
+                    string reponse = Console.ReadLine();
+
+                    if (reponse == "1")
+                    {
+                        Console.WriteLine("Prix pour la seconde classe");
+                        json.trierParPrix2ndclasse();
+                        Console.WriteLine();
+                        Console.WriteLine("Tapez pour continuer pour avoir les prix de la première classe");
+                        Console.ReadLine();
+                        Console.WriteLine("Prix pour la première classe");
+                        json.trierParPrix1erclasse();
+                    }
+                    else if (reponse == "2")
+                    {
+                        json.proposerDépart();
+                    }
                 }
                 else if (sourceVoulue == "xml")
                 {
                     Xml xml = new Xml();
-                    xml.main();
+
+                    Console.WriteLine("Tapez 1 pour trier les trajets par prix OU tapez 2 pour chercher un trajet ?");
+                    string reponse = Console.ReadLine();
+
+                    if (reponse == "1")
+                    {
+                        Console.WriteLine("Prix pour la seconde classe");
+                        xml.sortBySecondPrice();
+                        Console.WriteLine();
+                        Console.WriteLine("Tapez pour continuer pour avoir les prix de la première classe");
+                        Console.ReadLine();
+                        Console.WriteLine("Prix pour la première classe");
+                        xml.sortByFirstPrice();
+                    }
+                    else if (reponse == "2")
+                    {
+                        xml.main();
+                    }
                 }
                 else
                 {
