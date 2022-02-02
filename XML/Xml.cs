@@ -9,9 +9,11 @@ namespace linq_csharp
 {
     class Xml
     {
-        List<String> gares = new List<string>();
-        IEnumerable<String> garesUnique = new List<string>();
+        XElement xmlTravels = XElement.Load($@"{Directory.GetCurrentDirectory()}/XML/tarifs-tgv-par-od.xml");
 
+        List<String> travels = new List<string>();
+        IEnumerable<String> departs = new List<string>();
+        IEnumerable<String> arrivees = new List<string>();
 
         int compteurAffichage = 1;
         int espaceAAjouter = 0;
@@ -22,15 +24,14 @@ namespace linq_csharp
 
         public void main()
         {
-            showAllTravels();
+            showAllDeparts();
             askDepart();
             askArrivee();
         }
 
-        public void showAllTravels()
+        public void showAllDeparts()
         {
-            var xmlTravels = XElement.Load($@"{Directory.GetCurrentDirectory()}/XML/tarifs-tgv-par-od.xml");
-            Console.WriteLine("Veuillez taper une touche pour voir la liste de tous les trajets disponibles");
+            Console.WriteLine("Veuillez taper une touche pour voir la liste de toutes les gares de départs disponibles");
             Console.ReadLine();
             var allTravels = from travel in xmlTravels.Descendants("fields")
                              let od = travel.Element("od").Value
@@ -38,82 +39,138 @@ namespace linq_csharp
 
             foreach (var travel in allTravels)
             {
-                Console.WriteLine(travel);
+                travels.Add(travel.ToString());
             }
-            Console.WriteLine();
+
+            var departReq = from travel in travels
+                            let carac = travel.ToString().IndexOf("-")
+                            let line = travel.ToString().Substring(0, carac)
+                            orderby line
+                            select line;
+
+            departReq = departReq.Select(t => t.Trim().ToUpper());
+            departs = departReq.Distinct();
+            print4By4(departs);
         }
 
         public void askDepart()
         {
-            var xmlTravels = XElement.Load($@"{Directory.GetCurrentDirectory()}/XML/tarifs-tgv-par-od.xml");
-            Console.WriteLine("D'où voulez-vous partir ?");
-            rechercheDepart = Console.ReadLine();
             Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("D'où voulez-vous partir ?");
+            rechercheDepart = Console.ReadLine().ToUpper();
+            Console.WriteLine();
+            bool isGareCorrect = false;
+
+            foreach (var gare in departs)
+            {
+                if (rechercheDepart == gare)
+                {
+                    isGareCorrect = true;
+                }
+            }
+            if (!isGareCorrect)
+            {
+                while (!isGareCorrect)
+                {
+                    Console.WriteLine("Cette gare n'existe pas, veuillez retaper votre destination :");
+                    rechercheDepart = Console.ReadLine().ToUpper();
+                    foreach (var gare in departs)
+                    {
+                        if (rechercheDepart == gare)
+                        {
+                            isGareCorrect = true;
+                        }
+                    }
+                }
+            }
 
             var departRequest = from travel in xmlTravels.Descendants("fields")
                                 let od = travel.Element("od").Value
-                                where od.Contains(rechercheDepart, StringComparison.InvariantCultureIgnoreCase)
-                                select getDepartFromRequest(od, rechercheDepart);
+                                where od.Contains(rechercheDepart)
+                                select od
+                                into tousTrajets
+                                let carac = tousTrajets.ToString().IndexOf("-") + 1
+                                let arrivee = tousTrajets.ToString().Substring(carac)
+                                select arrivee;
 
-            foreach (var travel in departRequest)
-            {
-                if (travel != "")
-                {
-                    Console.WriteLine(travel);
-                }
-            }
-            Console.WriteLine();
+            departRequest = departRequest.Select(t => t.Trim().ToUpper());
+            arrivees = departRequest.Where(i => !i.Contains(rechercheDepart));
+            print4By4(arrivees);
         }
 
         public void askArrivee()
         {
-            var xmlTravels = XElement.Load($@"{Directory.GetCurrentDirectory()}/XML/tarifs-tgv-par-od.xml");
-            Console.WriteLine("Où voulez-vous aller depuis votre destination de départ ?");
-            rechercheArrivee = Console.ReadLine();
-            Console.WriteLine();
+            Console.WriteLine("");
+            Console.WriteLine("Où voulez-vous arriver ? ");
+            rechercheArrivee = Console.ReadLine().ToUpper();
+            bool isGareCorrect = false;
+
+            //On vérifie que la gare recherchée existe avec le départ choisi
+            foreach (var gare in arrivees)
+            {
+                if (rechercheArrivee == gare)
+                {
+                    isGareCorrect = true;
+                }
+            }
+            if (!isGareCorrect)
+            {
+                while (!isGareCorrect)
+                {
+                    Console.WriteLine("Cette gare d'arrivée n'est pas disponible avec votre départ, veuillez entrer une arrivée disponible");
+                    rechercheArrivee = Console.ReadLine().ToUpper();
+                    foreach (var gare in arrivees)
+                    {
+                        if (rechercheArrivee == gare)
+                        {
+                            isGareCorrect = true;
+                        }
+                    }
+                }
+            }
 
             var arriveeRequest = from travel in xmlTravels.Descendants("fields")
                                  let od = travel.Element("od").Value
-                                 let priceSecond = travel.Element("plein_tarif_loisir_2nde").Value
-                                 let priceFirst = travel.Element("premiere_classe").Value
-                                 where od.Contains(rechercheArrivee, StringComparison.InvariantCultureIgnoreCase)
-                                 select getArriveeFromDepart(od, rechercheDepart, rechercheArrivee);
+                                 let secondPrice = travel.Element("plein_tarif_loisir_2nde").Value
+                                 let firstPrice = travel.Element("premiere_classe").Value
+                                 where od.Contains(rechercheDepart) && od.Contains(rechercheArrivee) && od.StartsWith(rechercheDepart)
+                                 select $"Votre trajet : {od}, pour le prix 2nd classe {secondPrice}EUR, pour le prix 1er classe {firstPrice}EUR";
+
 
             foreach (var travel in arriveeRequest)
             {
-                if (travel != "")
-                {
-                    Console.WriteLine(travel);
-                }
+                Console.WriteLine(travel);
             }
         }
 
-        public string getArriveeFromDepart(string od, string rechercheDepart, string rechercheArrivee)
+        public void sortBySecondPrice()
         {
-            if (od.Substring(0, od.IndexOf("-")).Contains(rechercheDepart, StringComparison.InvariantCultureIgnoreCase) &&
-                od.Substring(od.IndexOf("-")).Contains(rechercheArrivee, StringComparison.InvariantCultureIgnoreCase))
+            var reqSecond = from travel in xmlTravels.Descendants("fields")
+                            orderby travel.Element("plein_tarif_loisir_2nde")
+                            let ligne = $"Voyage : {travel.Element("od")} Prix (2eme classe) : {travel.Element("plein_tarif_loisir_2nde")} EUR"
+                            select ligne;
+
+            foreach (var travel in reqSecond)
             {
-                return od;
-            }
-            else
-            {
-                return "";
+                Console.WriteLine(travel);
             }
         }
 
-        public string getDepartFromRequest(string od, string recherche)
+        public void sortByFirstPrice()
         {
-            if (od.Substring(0, od.IndexOf("-")).Contains(recherche, StringComparison.InvariantCultureIgnoreCase))
+            var reqFirst = from travel in xmlTravels.Descendants("fields")
+                            orderby travel.Element("premiere_classe")
+                            let ligne = $"Voyage : {travel.Element("od")} Prix (1ere classe) : {travel.Element("premiere_classe")} EUR"
+                            select ligne;
+
+            foreach (var travel in reqFirst)
             {
-                return od;
-            } 
-            else
-            {
-                return "";
+                Console.WriteLine(travel);
             }
         }
 
-        public void affiche4par4(IEnumerable<String> listeAAfficher)
+        public void print4By4(IEnumerable<String> listeAAfficher)
         {
             Console.WriteLine("");
             foreach (var travel in listeAAfficher)
